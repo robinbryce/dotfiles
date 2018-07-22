@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 REPODIRS=(vimfiles dotfiles)
 MESSAGE="Checkpoint commit"
 
@@ -47,8 +46,10 @@ for repodir in ${REPODIRS[*]}; do
   cd $HOME/$repodir
   echo ">> $HOME/$repodir"
   untracked=$(git ls-files --other --exclude-standard | wc -l)
-  git diff-index --quiet HEAD --
-  modified=$?
+  modified=0
+  if ! git diff-index --quiet HEAD --; then
+    modified=1
+  fi
 
   echo "Stvars: $untracked $modified"
 
