@@ -51,8 +51,6 @@ for repodir in ${REPODIRS[*]}; do
     modified=1
   fi
 
-  echo "Stvars: $untracked $modified"
-
   if [[ $untracked -gt 0 || $modified -eq 1 ]] ; then
     if [[ $force_add_flag -ne 1 ]]; then
       echo "  ** $repodir has modified and/or untracked files, set --add or resolve manually"
