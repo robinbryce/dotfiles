@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 REPODIRS=(vimfiles dotfiles)
 MESSAGE="Checkpoint commit"
 
