@@ -1,26 +1,59 @@
-# tuf <tusk-name>
-#
-# Search a tuskile identified by <tusk-name> in all the directories identified
-# by TUSKDIRS and run it with the remaining $@ args
-#
-# tusk -q -f tusk-<yaml>.yml "$@"
-#
-# priority:
-#
-# Find the first match in the directories identified by the PATH like variable
-# $TUSKDIRS using the following rules
-#
-# 0. NAME=<tusk-name>
-# 1. $NAME
-# 2. $NAME.yml
-# 3. tusk-$NAME
-# 4. tusk-${NAME}.yml
-#
+tuf_usage() {
+cat << EOF
+tuf [TUF_OPTS] <tusk-name> [tusk-options-and-args]
+
+Search a tuskile identified by <tusk-name> in all the directories identified
+by TUSKDIRS and run it with the remaining $@ args
+
+tusk -q -f tusk-<yaml>.yml "$@"
+
+priority:
+
+Find the first match in the directories identified by the PATH like variable
+\$TUSKDIRS using the following rules
+
+0. NAME=<tusk-name>
+1. \$NAME
+2. \$NAME.yml
+3. tusk-\$NAME
+4. tusk-\${NAME}.yml
+
+TUF_OPTS
+-h, --help, --help display this message
+-l, --list         list all matches rather than executing first
+--debug            show match diagnostics
+EOF
+}
+
 tuf ()
 {
+	LIST=false
+	DEBUG=false
+	while true; do
+		 case "$1" in
+		 -h|--help)
+		 	shift
+		 	tuf_usage
+			;;
+		 -l|--list)
+			shift
+		 	echo "Listing (all) matches - only the first would be used"
+			LIST=true
+			;;
+		 --debug)
+			shift
+		 	DEBUG=true
+		 	;;
+		 *)
+		 	break
+			;;
+		esac
+	done
+
+	[ $# -eq 0 ] && tuf_usage && return 1
 	export NAME=$1
 	shift
-	DEBUG=true
+
 	(
 		TUSKDIRS=${TUSKDIRS:-~/.tuskfiles}
 
@@ -31,18 +64,13 @@ tuf ()
 				F=$TUSKFILES/$basename
 				$DEBUG && echo $F
 				if [[ -f $F ]]; then
-					break
+					$DEBUG || $LIST && echo tusk -s -f $F "$@"
+					! $LIST && exec tusk -q -f $F "$@" && return
 				fi
 			done
-			$DEBUG && [[ ! -f $F ]] && echo "tusk name $NAME not found in $TUSKFILES"
-			if [[ ! -f $F ]]; then
-				continue
-			else
-				$DEBUG && echo tusk -s -f $F "$@"
-				exec tusk -q -f $F "$@"
-			fi
+			$DEBUG echo "tusk name $NAME not found in $TUSKFILES"
 		done
-		echo "tusk file not found as any of $NAME $NAME.yml tusk-$NAME tusk-$NAME.yml"
-		echo "in TUSKFILES=$TUSKFILES"
+		! $LIST && echo "tusk file not found as any of $NAME $NAME.yml tusk-$NAME tusk-$NAME.yml"
+		echo "in TUSKDIRS=$TUSKDIRS"
 	)
 }
