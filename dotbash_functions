@@ -17,7 +17,7 @@ NAME=<tusk-name>
 2. \$NAME.yml
 3. tusk-\$NAME
 4. tusk-\${NAME}.yml
-5. $NAME/tusk.yml  (allowing for the discovery of tusk.yml in directories identified by NAME)
+5. \$NAME/tusk.yml  (allowing for the discovery of tusk.yml in directories identified by NAME)
 
 TUF_OPTS
 -h, --help, --help display this message
@@ -57,8 +57,6 @@ tuf ()
 
 	(
 		TUSKDIRS=${TUSKDIRS:-~/.tuskfiles}
-
-		TUSKFILES=${TUSKFILES:-~/.tuskfiles}
 
 		for TUSKFILES in ${TUSKDIRS//:/ }; do
 			for basename in $NAME $NAME.yml tusk-$NAME tusk-$NAME.yml $NAME/tusk.yml; do
