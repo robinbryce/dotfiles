@@ -1,0 +1,29 @@
+tuf ()
+{
+  NAME=$1
+	TUSKFILES=${TUSKFILES:-~/.tuskfiles}
+	shift
+
+	DEBUG=false
+
+	# priority:
+	# 1. exactly the name provided as basename
+	# 2. exactly the name provided + .yml as basename
+	# 3. tusk-$NAME as basename
+	# 4. tusk-$NAME + .yml as basename
+	
+	for basename in $NAME $NAME.yml tusk-$NAME tusk-$NAME.yml; do
+		F=$TUSKFILES/$basename
+		$DEBUG && echo $F
+		if [[ -f $F ]]; then
+			break
+		fi
+	done
+	if [[ ! -f $F ]]; then
+		echo "tusk file not found as any of $NAME $NAME.yml tusk-$NAME tusk-$NAME.yml"
+		echo "in TUSKFILES=$TUSKFILES"
+	else
+		$DEBUG && echo tusk -s -f $F "$@"
+		tusk -q -f $F $@
+	fi
+}
