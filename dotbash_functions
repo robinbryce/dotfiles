@@ -1,29 +1,48 @@
+# tuf <tusk-name>
+#
+# Search a tuskile identified by <tusk-name> in all the directories identified
+# by TUSKDIRS and run it with the remaining $@ args
+#
+# tusk -q -f tusk-<yaml>.yml "$@"
+#
+# priority:
+#
+# Find the first match in the directories identified by the PATH like variable
+# $TUSKDIRS using the following rules
+#
+# 0. NAME=<tusk-name>
+# 1. $NAME
+# 2. $NAME.yml
+# 3. tusk-$NAME
+# 4. tusk-${NAME}.yml
+#
 tuf ()
 {
-  NAME=$1
-	TUSKFILES=${TUSKFILES:-~/.tuskfiles}
+	export NAME=$1
 	shift
+	DEBUG=true
+	(
+		TUSKDIRS=${TUSKDIRS:-~/.tuskfiles}
 
-	DEBUG=false
+		TUSKFILES=${TUSKFILES:-~/.tuskfiles}
 
-	# priority:
-	# 1. exactly the name provided as basename
-	# 2. exactly the name provided + .yml as basename
-	# 3. tusk-$NAME as basename
-	# 4. tusk-$NAME + .yml as basename
-	
-	for basename in $NAME $NAME.yml tusk-$NAME tusk-$NAME.yml; do
-		F=$TUSKFILES/$basename
-		$DEBUG && echo $F
-		if [[ -f $F ]]; then
-			break
-		fi
-	done
-	if [[ ! -f $F ]]; then
+		for TUSKFILES in ${TUSKDIRS//:/ }; do
+			for basename in $NAME $NAME.yml tusk-$NAME tusk-$NAME.yml; do
+				F=$TUSKFILES/$basename
+				$DEBUG && echo $F
+				if [[ -f $F ]]; then
+					break
+				fi
+			done
+			$DEBUG && [[ ! -f $F ]] && echo "tusk name $NAME not found in $TUSKFILES"
+			if [[ ! -f $F ]]; then
+				continue
+			else
+				$DEBUG && echo tusk -s -f $F "$@"
+				exec tusk -q -f $F "$@"
+			fi
+		done
 		echo "tusk file not found as any of $NAME $NAME.yml tusk-$NAME tusk-$NAME.yml"
 		echo "in TUSKFILES=$TUSKFILES"
-	else
-		$DEBUG && echo tusk -s -f $F "$@"
-		tusk -q -f $F $@
-	fi
+	)
 }

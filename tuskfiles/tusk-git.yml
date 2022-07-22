@@ -1,0 +1,37 @@
+interpreter: bash -c
+name: git
+usage: general git conveniences
+options:
+
+  launchdir:
+    usage: >
+      Don't set this option. Its a work around for a go-tusk peculiarity
+    environment: PWD
+
+tasks:
+
+  # gac add commit no push is just gap -P
+  gap:
+    usage: "git add and commit with message and push - abort if untracked files"
+    options:
+      message:
+        short: m
+        default: "wip"
+      nopush:
+        type: bool
+        short: P
+    args:
+      dir:
+    run:
+      - command:
+          exec: |
+            set -e
+
+            cd ${launchdir}
+            git status -s | egrep "^\?\?" && echo "untracked files" && exit 1
+
+            ( [ -z "${dir}" ] || [ ! -d ${dir} ] ) && echo "${dir} is not a directory" && exit 1
+            cd ${dir}
+            git add .
+            git commit -m "${message}"
+            ! ${nopush} && git push

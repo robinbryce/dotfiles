@@ -15,8 +15,8 @@ alias fiona='tusk -q -f ~/thaumagen/fluxcd-iona/tusk.yml'
 alias fseal='tusk -q -f ~/thaumagen/fluxcd-iona/seal.yml'
 alias b2c='tusk -qf ~/jitsuin/avid/scripts/incubator/tuskfiles/b2c.yml'
 alias rengopls='for pid in $(pgrep gopls); do renice -n 10 -p $pid; done'
-alias gap='tusk -qf ~/tusk.yml gap'
-alias gac='tusk -qf ~/tusk.yml gap -P'
+alias gap='tuf git gap'
+alias gac='tuf git gap -P'
 
 # tmux
 alias jitmux='tmux new-session -s jitsuin -c ~/jitsuin\; split-window -h \; split-window -v \; split-window -h \;'
