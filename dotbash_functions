@@ -1,23 +1,23 @@
 tuf_usage() {
 cat << EOF
-tuf [TUF_OPTS] <tusk-name> [tusk-options-and-args]
+tuf [TUF_OPTS] NAME [tusk-options-and-args]
 
 Search a tuskile identified by <tusk-name> in all the directories identified
 by TUSKDIRS and run it with the remaining $@ args
 
-tusk -q -f tusk-<yaml>.yml "$@"
+tusk -q -f MATCHED-TUSKFILE "$@"
 
-priority:
+MATCHED-TUSKFILE is selected as the first match in the directories identified
+by the PATH like variable \$TUSKDIRS using the following rules (in priority
+order)
 
-Find the first match in the directories identified by the PATH like variable
-\$TUSKDIRS using the following rules
+NAME=<tusk-name>
 
-0. NAME=<tusk-name>
 1. \$NAME
 2. \$NAME.yml
 3. tusk-\$NAME
 4. tusk-\${NAME}.yml
-5. $NAME/tusk.yml  IF $NAME is a directory in each of the dirs in TUSKDIRs
+5. $NAME/tusk.yml  (allowing for the discovery of tusk.yml in directories identified by NAME)
 
 TUF_OPTS
 -h, --help, --help display this message
@@ -65,7 +65,7 @@ tuf ()
 				F=$TUSKFILES/$basename
 				$DEBUG && echo $F
 				if [[ -f $F ]]; then
-					$DEBUG || $LIST && echo tusk -s -f $F "$@"
+					$DEBUG || $LIST && echo tusk -q -f $F "$@"
 					! $LIST && exec tusk -q -f $F "$@" && return
 				fi
 			done
