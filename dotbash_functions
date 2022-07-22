@@ -17,6 +17,7 @@ Find the first match in the directories identified by the PATH like variable
 2. \$NAME.yml
 3. tusk-\$NAME
 4. tusk-\${NAME}.yml
+5. $NAME/tusk.yml  IF $NAME is a directory in each of the dirs in TUSKDIRs
 
 TUF_OPTS
 -h, --help, --help display this message
@@ -60,7 +61,7 @@ tuf ()
 		TUSKFILES=${TUSKFILES:-~/.tuskfiles}
 
 		for TUSKFILES in ${TUSKDIRS//:/ }; do
-			for basename in $NAME $NAME.yml tusk-$NAME tusk-$NAME.yml; do
+			for basename in $NAME $NAME.yml tusk-$NAME tusk-$NAME.yml $NAME/tusk.yml; do
 				F=$TUSKFILES/$basename
 				$DEBUG && echo $F
 				if [[ -f $F ]]; then
