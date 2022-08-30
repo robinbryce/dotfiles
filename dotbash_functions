@@ -7,17 +7,16 @@ by TUSKDIRS and run it with the remaining $@ args
 
 tusk -q -f MATCHED-TUSKFILE "$@"
 
+Run `tuf' with no other arguments to list all findable tusk files
+
 MATCHED-TUSKFILE is selected as the first match in the directories identified
 by the PATH like variable \$TUSKDIRS using the following rules (in priority
 order)
 
 NAME=<tusk-name>
 
-1. \$NAME
-2. \$NAME.yml
-3. tusk-\$NAME
-4. tusk-\${NAME}.yml
-5. \$NAME/tusk.yml  (allowing for the discovery of tusk.yml in directories identified by NAME)
+1. tusk-\${NAME}.yml
+2. \$NAME/tusk.yml  (allowing for the discovery of tusk.yml in directories identified by NAME)
 
 TUF_OPTS
 -h, --help, --help display this message
@@ -26,32 +25,61 @@ TUF_OPTS
 EOF
 }
 
+tul ()
+{
+	TUSKDIRS=${TUSKDIRS:-~/.tuskfiles}
+
+	for TUSKFILES in ${TUSKDIRS//:/ }; do
+
+		# list the directories on the path which contain tusk.yml's first
+		for dir in $(ls -d $TUSKFILES/*); do
+			[ ! -d $dir ] && continue
+			F=$dir/tusk.yml
+			[ ! -f $F ] && continue
+			echo "tuf $(basename $dir) -> $TUSKFILES: $F"
+		done
+
+		# Now list the files matching tusk-*.yml on the path
+
+		for m in ls -f $TUSKFILES/tusk-*.yml; do
+			[ ! -f $m ] && continue
+			base=$(basename $m)
+			verb=${base#tusk-}
+			echo "tuf ${verb%.*} $TUSKFILES: $m"
+		done
+	done
+	echo "in TUSKDIRS=$TUSKDIRS"
+}
+
 tuf ()
 {
 	LIST=false
 	DEBUG=false
 	while true; do
-		 case "$1" in
-		 -h|--help)
-		 	shift
-		 	tuf_usage
+		case "$1" in
+			-h|--help)
+			shift
+			tuf_usage && return 0
 			;;
-		 -l|--list)
+			-l|--list)
 			shift
 		 	echo "Listing (all) matches - only the first would be used"
 			LIST=true
 			;;
-		 --debug)
+			--list-all)
+			tul && return 0
+			;;
+			--debug)
 			shift
 		 	DEBUG=true
 		 	;;
-		 *)
+			*)
 		 	break
 			;;
 		esac
 	done
 
-	[ $# -eq 0 ] && tuf_usage && return 1
+	[ $# -eq 0 ] && tul && return 0
 	export NAME=$1
 	shift
 
@@ -59,7 +87,7 @@ tuf ()
 		TUSKDIRS=${TUSKDIRS:-~/.tuskfiles}
 
 		for TUSKFILES in ${TUSKDIRS//:/ }; do
-			for basename in $NAME $NAME.yml tusk-$NAME tusk-$NAME.yml $NAME/tusk.yml; do
+			for basename in tusk-$NAME.yml $NAME/tusk.yml; do
 				F=$TUSKFILES/$basename
 				$DEBUG && echo $F
 				if [[ -f $F ]]; then
@@ -69,7 +97,7 @@ tuf ()
 			done
 			$DEBUG echo "tusk name $NAME not found in $TUSKFILES"
 		done
-		! $LIST && echo "tusk file not found as any of $NAME $NAME.yml tusk-$NAME tusk-$NAME.yml"
+		! $LIST && echo "tusk file not found as any of tusk-$NAME.yml <TUSKDIR>/tusk.yml"
 		echo "in TUSKDIRS=$TUSKDIRS"
 	)
 }

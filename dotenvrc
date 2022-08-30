@@ -1,1 +1,10 @@
 export TUSKDIRS=~/.tuskfiles
+export LDFLAGS="-L/home/linuxbrew/.linuxbrew/opt/xz/lib $LDFLAGS"
+export LDFLAGS="-L/home/linuxbrew/.linuxbrew/opt/zlib/lib $LDFLAGS"
+export LDFLAGS="-L/home/linuxbrew/.linuxbrew/opt/bzip2/lib $LDFLAGS"
+export LDFLAGS="-L/home/linuxbrew/.linuxbrew/opt/sqlite3/lib $LDFLAGS"
+
+export CPPFLAGS="-I/home/linuxbrew/.linuxbrew/opt/xz/include $CPPFLAGS"
+export CPPFLAGS="-I/home/linuxbrew/.linuxbrew/opt/zlib/include $CPPFLAGS"
+export CPPFLAGS="-I/home/linuxbrew/.linuxbrew/opt/bzip2/include $CPPFLAGS"
+export CPPFLAGS="-I/home/linuxbrew/.linuxbrew/opt/sqlite3/include $CPPFLAGS"
