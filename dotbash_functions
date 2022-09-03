@@ -25,27 +25,39 @@ TUF_OPTS
 EOF
 }
 
-tul ()
-{
+tal () {
+
+	dirfile=${1:-Taskfile.yml}
+	filepat=${2:-task-*.yml}
+	cmd=${3:-""}
+	verbose=false
+	[ -n "$cmd" ] && verbose=true
+	
+
 	TUSKDIRS=${TUSKDIRS:-~/.tuskfiles}
 
 	for TUSKFILES in ${TUSKDIRS//:/ }; do
 
-		# list the directories on the path which contain tusk.yml's first
-		for dir in $(ls -d $TUSKFILES/*); do
+		# list the directories on the path which contain files called dirfil first
+		# typically Taskfile.yml or tusk.yml
+
+		for dir in $TUSKFILES/*; do
 			[ ! -d $dir ] && continue
-			F=$dir/tusk.yml
+			F=$dir/$dirfile
 			[ ! -f $F ] && continue
-			echo "tuf $(basename $dir) -> $TUSKFILES: $F"
+			$verbose && echo "$cmd $(basename $dir): $TUSKFILES $(basename $dir)/$dirfile" && continue
+			echo $F
 		done
 
-		# Now list the files matching tusk-*.yml on the path
+		# Now list the files matching filepat on the path. Typicaly filepat is
+		# task-*.yml or tusk-*.yml
 
-		for m in ls -f $TUSKFILES/tusk-*.yml; do
+		for m in $TUSKFILES/$filepat; do
 			[ ! -f $m ] && continue
 			base=$(basename $m)
-			verb=${base#tusk-}
-			echo "tuf ${verb%.*} $TUSKFILES: $m"
+			verb=${base#*-}
+			$verbose && echo "$cmd ${verb%.*} $TUSKFILES: $base" && continue
+			echo $F
 		done
 	done
 	echo "in TUSKDIRS=$TUSKDIRS"
@@ -66,8 +78,8 @@ tuf ()
 		 	echo "Listing (all) matches - only the first would be used"
 			LIST=true
 			;;
-			--list-all)
-			tul && return 0
+			-L|--list-all)
+			tal "tusk.yml" "tusk-*.yml" tusk && return 0
 			;;
 			--debug)
 			shift
@@ -79,7 +91,7 @@ tuf ()
 		esac
 	done
 
-	[ $# -eq 0 ] && tul && return 0
+	[ $# -eq 0 ] && tal "tusk.yml" "tusk-*.yml" tusk && return 0
 	export NAME=$1
 	shift
 
@@ -98,6 +110,65 @@ tuf ()
 			$DEBUG echo "tusk name $NAME not found in $TUSKFILES"
 		done
 		! $LIST && echo "tusk file not found as any of tusk-$NAME.yml <TUSKDIR>/tusk.yml"
+		echo "in TUSKDIRS=$TUSKDIRS"
+	)
+}
+
+taf_usage() {
+ echo as per tuf but for taskfiles. uses same directory path
+}
+
+taf ()
+{
+	LIST=false
+	DEBUG=false
+	while true; do
+		case "$1" in
+			-h|--help)
+			shift
+			taf_usage && return 0
+			;;
+			-l|--list)
+			shift
+		 	echo "Listing (all) matches - only the first would be used"
+			LIST=true
+			;;
+			-L|--list-all)
+			tal "Taskfile.yml" "task-*.yml" task && return 0
+			;;
+			--debug)
+			shift
+		 	DEBUG=true
+		 	;;
+			-D|--dry)
+			shift
+		 	DRY=true
+			;;
+			*)
+		 	break
+			;;
+		esac
+	done
+
+	[ $# -eq 0 ] && tal && return 0
+	export NAME=$1
+	shift
+
+	(
+		TUSKDIRS=${TUSKDIRS:-~/.tuskfiles}
+
+		for TUSKFILES in ${TUSKDIRS//:/ }; do
+			for basename in task-$NAME.yml $NAME/Taskfile.yml; do
+				F=$TUSKFILES/$basename
+				$DEBUG && echo $F
+				if [[ -f $F ]]; then
+					$DEBUG || $LIST && echo task ${DRY:+--dry} --silent -t $F "$@"
+					! $LIST && exec task ${DRY:+--dry} --silent -t $F "$@" && return
+				fi
+			done
+			$DEBUG echo "task name $NAME not found in $TUSKFILES"
+		done
+		! $LIST && echo "task file not found as any of task-$NAME.yml <TUSKDIR>/Taskfile.yml"
 		echo "in TUSKDIRS=$TUSKDIRS"
 	)
 }
