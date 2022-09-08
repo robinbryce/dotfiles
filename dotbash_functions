@@ -44,6 +44,7 @@ tal () {
 		for dir in $TUSKFILES/*; do
 			[ ! -d $dir ] && continue
 			F=$dir/$dirfile
+			[ -f $F ] && $verbose && echo "$cmd $(basename $dir): $TUSKFILES $(basename $dir)/$dirfile" && continue
 			[ ! -f $F ] && continue
 			$verbose && echo "$cmd $(basename $dir): $TUSKFILES $(basename $dir)/$dirfile" && continue
 			echo $F
@@ -99,13 +100,16 @@ tuf ()
 		TUSKDIRS=${TUSKDIRS:-~/.tuskfiles}
 
 		for TUSKFILES in ${TUSKDIRS//:/ }; do
-			for basename in tusk-$NAME.yml $NAME/tusk.yml; do
-				F=$TUSKFILES/$basename
-				$DEBUG && echo $F
-				if [[ -f $F ]]; then
-					$DEBUG || $LIST && echo tusk -q -f $F "$@"
-					! $LIST && exec tusk -q -f $F "$@" && return
-				fi
+		  for dirbase in ./ $(ls -d $TUSKFILES/*/); do
+				for basename in tusk-$NAME.yml $NAME/tusk.yml; do
+					# F=$TUSKFILES/$basename
+					F=${dirbase}${basename}
+					$DEBUG && echo $F
+					if [[ -f $F ]]; then
+						$DEBUG || $LIST && echo tusk -q -f $F "$@"
+						! $LIST && exec tusk -q -f $F "$@" && return
+					fi
+				done
 			done
 			$DEBUG echo "tusk name $NAME not found in $TUSKFILES"
 		done
@@ -150,7 +154,7 @@ taf ()
 		esac
 	done
 
-	[ $# -eq 0 ] && tal && return 0
+	[ $# -eq 0 ] && tal "Taskfile.yml" "task-*.yml" task && return 0
 	export NAME=$1
 	shift
 
