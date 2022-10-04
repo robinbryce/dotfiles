@@ -6,6 +6,7 @@ alias ta='task -s'
 
 # avid/quorum
 alias q0exec='kubectl -n dev-robin-quorum-node-0 -c avid-quorum exec avid-quorum-quorum-0 -- geth attach /var/lib/quorum/node/geth.ipc --exec'
+alias q0esh='kubectl -it -n dev-robin-quorum-node-0 -c avid-quorum exec avid-quorum-quorum-0 -- geth attach /var/lib/quorum/node/geth.ipc'
 alias q1exec='kubectl -n dev-robin-quorum-node-1 -c avid-quorum exec avid-quorum-quorum-0 -- geth attach /var/lib/quorum/node/geth.ipc --exec'
 alias q0eth='kubectl -n dev-robin-quorum-node-0 -c avid-quorum exec avid-quorum-quorum-0 -- geth'
 

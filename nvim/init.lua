@@ -1,4 +1,5 @@
 -- made using: https://vonheikemen.github.io/devlog/tools/configuring-neovim-using-lua/
+-- see also: https://github.com/nanotee/nvim-lua-guide
 -- OLD
 -- set runtimepath^=~/.vim runtimepath+=~/.vim/after
 -- let &packpath=&runtimepath
@@ -29,7 +30,7 @@ if vim.env.MYVIMRC then
 else
   print('MYVIMRC, not set did you launch with -u ?')
 end
-print('CONFIGDIR: ' .. configdir)
+-- print('CONFIGDIR: ' .. configdir)
 
 -- ---------------------------------------------------------------------------
 -- explicit sources and pre-flight (bootstrap 2)
@@ -84,11 +85,15 @@ vim.g.updatetime=400
 -- ---------------------------------------------------------------------------
 -- Global bindings
 -- ---------------------------------------------------------------------------
+-- https://github.com/nanotee/nvim-lua-guide#defining-mappings
 -- vim.keymap.set('n', '<F12>', ':NERDTreeToggle<CR>')
-vim.keymap.set('n', '<F3>', ':Ack<CR>')
+vim.keymap.set('n', '<F3>', ':Ag<CR>')
+vim.keymap.set('n', '<C-p>', ':FZF<cr>')
 -- vim.keymap.set('n', '<F7>', ':ALEFix<CR>')
 -- vim.keymap.set('n', '<F8>', ':TagbarToggle<CR>')
 --
+vim.keymap.set('n', '<leader>/', ':Ag ')
+-- vim.keymap.set('n', '<leader>x', ':Ag expand("<cword>")') doesn't work
 vim.keymap.set('n', '<leader>fn', ':echo expand("%:p")<CR>')
 vim.keymap.set('n', '<leader>cl', ':set cursorline<cr>')
 vim.keymap.set('n', '<leader>ncl', ':set nocursorline<cr>')
@@ -99,57 +104,39 @@ vim.keymap.set('n', '<leader>ns', ':set nospell<cr>')
 -- toggle line numbers with <leader>nn, makes copying cleaner
 vim.keymap.set('n', '<leader>nn', ':set nonumber!<CR>:set foldcolumn=0<CR>')
 
+-- Further plugin specific bindins in:
+-- Source navigation & formatting
+-- . lua/user/lsp.lua (language server protocl)
+-- . lua/user.lspsaga.lua (language server protocl)
+
 -- LANGUAGE SERVER PROTOCOL Keybindings
 -- (see further down for the connection between LSP attach and this autocmd)
 vim.api.nvim_create_autocmd('User', {
   pattern = 'LspAttached',
   desc = 'LSP actions',
   callback = function()
-    local bufmap = function(mode, lhs, rhs)
-      local opts = {buffer = true}
-      vim.keymap.set(mode, lhs, rhs, opts)
-    end
 
-    -- Displays hover information about the symbol under the cursor
-    -- bufmap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>')
-    -- lspsaga
-
-    -- Jump to the definition
-    -- bufmap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>')
-    -- lspsaga
-
-    -- Jump to declaration
-    bufmap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>')
-
-    -- Lists all the implementations for the symbol under the cursor
-    bufmap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<cr>')
-
-    -- Jumps to the definition of the type symbol
-    bufmap('n', 'go', '<cmd>lua vim.lsp.buf.type_definition()<cr>')
-
-    -- Lists all the references 
-    bufmap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>')
-
-    -- Displays a function's signature information
-    bufmap('n', '<leader>k', '<cmd>lua vim.lsp.buf.signature_help()<cr>')
-
-    -- Renames all references to the symbol under the cursor
-    bufmap('n', '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>')
-
-    -- Selects a code action available at the current cursor position
-    bufmap('n', '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>')
-    bufmap('x', '<F4>', '<cmd>lua vim.lsp.buf.range_code_action()<cr>')
-
-    -- Show diagnostics in a floating window
-    bufmap('n', 'gl', '<cmd>lua vim.diagnostic.open_float()<cr>')
-
-    -- Move to the previous diagnostic
-    bufmap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>')
-
-    -- Move to the next diagnostic
-    bufmap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>')
   end
 })
+
+-- ---------------------------------------------------------------------------
+-- snips bindings
+-- ---------------------------------------------------------------------------
+vim.cmd([[
+" press <Tab> to expand or jump in a snippet. These can also be mapped separately
+" via <Plug>luasnip-expand-snippet and <Plug>luasnip-jump-next.
+imap <silent><expr> <Tab> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<Tab>' 
+" -1 for jumping backwards.
+inoremap <silent> <S-Tab> <cmd>lua require'luasnip'.jump(-1)<Cr>
+
+snoremap <silent> <Tab> <cmd>lua require('luasnip').jump(1)<Cr>
+snoremap <silent> <S-Tab> <cmd>lua require('luasnip').jump(-1)<Cr>
+
+" For changing choices in choiceNodes (not strictly necessary for a basic setup).
+imap <silent><expr> <C-E> luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-E>'
+smap <silent><expr> <C-E> luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-E>'
+]])
+
 
 -- ---------------------------------------------------------------------------
 -- vim-plugs
@@ -199,7 +186,9 @@ Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/nvim-cmp'
--- 
+
+-- Development tooling
+Plug 'tpope/vim-fugitive'
 
 Plug('L3MON4D3/LuaSnip', {tag = 'v<CurrentMajor>.*'})
 Plug 'rafamadriz/friendly-snippets'
@@ -223,13 +212,15 @@ require('user.lspsaga')
 
 local luasnip_opts = {}
 if vim.fn.isdirectory(vim.fn.getcwd() .. '/.vscode') then
-  luasnip_opts.paths = {}
-  luasnip_opts.paths[0] = vim.fn.getcwd() .. '/.vscode'
-  for i, v in pairs(luasnip_opts.paths) do
-    print('luasnip paths: ' .. v)
-  end
+  luasnip_opts.paths = vim.fn.getcwd() .. '/.vscode'
+  print('luasnip paths: ' .. luasnip_opts.paths)
 end
-require("luasnip.loaders.from_vscode").lazy_load(luasnip_opts)
+luasnip = require('luasnip')
+luasnip.filetype_extend("all", {"_"})
+
+-- require("luasnip.loaders.from_vscode").lazy_load(luasnip_opts)
+require("luasnip.loaders.from_vscode").load(luasnip_opts)
+-- require("luasnip.loaders.from_vscode").load({paths = '~/.config/nvim/snippets-vscode'})
 
 -- supports vscode format but we need to configure it to look in the
 -- right places
