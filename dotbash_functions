@@ -1,38 +1,37 @@
-tuf_usage() {
+usage() {
+TOOL=$1; shift
+TOOL_OPTS="$1"; shift
+
 cat << EOF
-tuf [TUF_OPTS] NAME [tusk-options-and-args]
+[OPTS] NAME [$TOOL-options-and-args]
 
-Search a tuskile identified by <tusk-name> in all the directories identified
-by TUSKDIRS and run it with the remaining $@ args
+Search for a ${TOOL} file in all the directories identified by TUSKDIRS and
+run it with the remaining $@ args. (TUSKDIRS for both task and tusk)
 
-tusk -q -f MATCHED-TUSKFILE "$@"
+$TOOL $TOOL_OPTS MATCHED-${TOOL^^}FILE "\$@"
 
-Run `tuf' with no other arguments to list all findable tusk files
+Run with no other arguments to list all findable ${TOOL} files
 
-MATCHED-TUSKFILE is selected as the first match in the directories identified
-by the PATH like variable \$TUSKDIRS using the following rules (in priority
-order)
 
-NAME=<tusk-name>
-
-1. tusk-\${NAME}.yml
-2. \$NAME/tusk.yml  (allowing for the discovery of tusk.yml in directories identified by NAME)
-
-TUF_OPTS
+Options:
+-a, --list         list all matches rather than executing first
+-D, --discover      show all considered files
 -h, --help, --help display this message
--l, --list         list all matches rather than executing first
---debug            show match diagnostics
 EOF
 }
 
-tal () {
+findtoolverb () {
 
-	dirfile=${1:-Taskfile.yml}
-	filepat=${2:-task-*.yml}
-	cmd=${3:-""}
-	verbose=false
-	[ -n "$cmd" ] && verbose=true
-	
+	list=$1 # show all matches rather that reporting and terminating for first
+	discover=$2
+	tool=$3
+	verb=$4
+
+	dirfile=${5:-Taskfile.yml}
+	filepat=${6:-task-*.yml}
+	[ -z "$verb" ] && discover=true # if no verb, always discover
+
+	$discover && echo >&2 "LIST: $list, discover: $discover, TOOL: $tool, VERB: $verb"
 
 	TUSKDIRS=${TUSKDIRS:-~/.tuskfiles}
 
@@ -44,10 +43,13 @@ tal () {
 		for dir in $TUSKFILES/*; do
 			[ ! -d $dir ] && continue
 			F=$dir/$dirfile
-			[ -f $F ] && $verbose && echo "$cmd $(basename $dir): $TUSKFILES $(basename $dir)/$dirfile" && continue
-			[ ! -f $F ] && continue
-			$verbose && echo "$cmd $(basename $dir): $TUSKFILES $(basename $dir)/$dirfile" && continue
-			echo $F
+			# If we are listing all matches, show this match and continue
+			if [[ -f $F ]] && [[ -n "$verb" ]] && [[ "$(basename $dir)" == "${verb}" ]]; then
+				$LIST && echo "$dir/$dirfile" && continue
+				echo "$dir/$dirfile" && return
+			fi
+			# If we are discover, show information about the file that didn't match the verb
+			[ -f $F ] && $discover && >&2 echo "$tool $(basename $dir): $TUSKFILES $(basename $dir)/$dirfile" && continue
 		done
 
 		# Now list the files matching filepat on the path. Typicaly filepat is
@@ -56,123 +58,72 @@ tal () {
 		for m in $TUSKFILES/$filepat; do
 			[ ! -f $m ] && continue
 			base=$(basename $m)
-			verb=${base#*-}
-			$verbose && echo "$cmd ${verb%.*} $TUSKFILES: $base" && continue
-			echo $F
+			foundverb=${base#*-}
+			! $LIST && [ -n "$verb" ] && [ "$verb" == "${foundverb%.*}" ] &&  echo $m && return
+			[ -n "$verb" ] && [ "$verb" == "${foundverb%.*}" ] &&  echo "$m" && continue
+			$discover && >&2 echo "$tool ${foundverb%.*} $TUSKFILES: $base" && continue
 		done
 	done
-	echo "in TUSKDIRS=$TUSKDIRS"
+	$discover && >&2 echo "in TUSKDIRS=$TUSKDIRS"
+	return 1
 }
 
-tuf ()
+tuf() {
+	tf tusk "-q -f" tusk.yml "tusk-*.yml" "$@"
+}
+
+taf() {
+	# TODO: --dry support
+	tf task "--silent -t" Taskfile.yml "task-*.yml" "$@"
+}
+
+
+tf ()
 {
+	TOOL="$1"; shift
+	TOOL_OPTS="$1"; shift
+	TOOLFILE_DEFAULT="$1"; shift
+	TOOLFILE_PATTERN="$1"; shift
+
+	NAME="-"
 	LIST=false
-	DEBUG=false
+	DISCOVER=false
 	while true; do
 		case "$1" in
 			-h|--help)
-			shift
-			tuf_usage && return 0
+			usage "$TOOL" "$TOOL_OPTS" "$TOOLFILE_DEFAULT" "$TOOLFILE_PATTERN"; return 0
 			;;
-			-l|--list)
-			shift
-		 	echo "Listing (all) matches - only the first would be used"
-			LIST=true
+			-a|--list)
+			shift; LIST=true
 			;;
-			-L|--list-all)
-			tal "tusk.yml" "tusk-*.yml" tusk && return 0
-			;;
-			--debug)
-			shift
-		 	DEBUG=true
+			-D|--discover)
+			shift; DISCOVER=true
 		 	;;
+			-*)
+			usage "$TOOL" "$TOOL_OPTS" "$TOOLFILE_DEFAULT" "$TOOLFILE_PATTERN"; return 0
+			;;
 			*)
-		 	break
+			break
 			;;
 		esac
 	done
 
-	[ $# -eq 0 ] && tal "tusk.yml" "tusk-*.yml" tusk && return 0
-	export NAME=$1
-	shift
 
-	(
-		TUSKDIRS=${TUSKDIRS:-~/.tuskfiles}
+	if [ $# -gt 0 ]; then
+		NAME=$1; shift
+	else
+		DISCOVER=true
+	fi
 
-		for TUSKFILES in ${TUSKDIRS//:/ }; do
-		  for dirbase in ./ $(ls -d $TUSKFILES/*/); do
-				for basename in tusk-$NAME.yml $NAME/tusk.yml; do
-					# F=$TUSKFILES/$basename
-					F=${dirbase}${basename}
-					$DEBUG && echo $F
-					if [[ -f $F ]]; then
-						$DEBUG || $LIST && echo tusk -q -f $F "$@"
-						! $LIST && exec tusk -q -f $F "$@" && return
-					fi
-				done
-			done
-			$DEBUG echo "tusk name $NAME not found in $TUSKFILES"
-		done
-		! $LIST && echo "tusk file not found as any of tusk-$NAME.yml <TUSKDIR>/tusk.yml"
-		echo "in TUSKDIRS=$TUSKDIRS"
-	)
-}
+	if $LIST || $DISCOVER; then
+		findtoolverb $LIST $DISCOVER tusk $NAME "$TOOLFILE_DEFAULT" "$TOOLFILE_PATTERN"
+		return $?
+	fi
 
-taf_usage() {
- echo as per tuf but for taskfiles. uses same directory path
-}
-
-taf ()
-{
-	LIST=false
-	DEBUG=false
-	while true; do
-		case "$1" in
-			-h|--help)
-			shift
-			taf_usage && return 0
-			;;
-			-l|--list)
-			shift
-		 	echo "Listing (all) matches - only the first would be used"
-			LIST=true
-			;;
-			-L|--list-all)
-			tal "Taskfile.yml" "task-*.yml" task && return 0
-			;;
-			--debug)
-			shift
-		 	DEBUG=true
-		 	;;
-			-D|--dry)
-			shift
-		 	DRY=true
-			;;
-			*)
-		 	break
-			;;
-		esac
-	done
-
-	[ $# -eq 0 ] && tal "Taskfile.yml" "task-*.yml" task && return 0
-	export NAME=$1
-	shift
-
-	(
-		TUSKDIRS=${TUSKDIRS:-~/.tuskfiles}
-
-		for TUSKFILES in ${TUSKDIRS//:/ }; do
-			for basename in task-$NAME.yml $NAME/Taskfile.yml; do
-				F=$TUSKFILES/$basename
-				$DEBUG && echo $F
-				if [[ -f $F ]]; then
-					$DEBUG || $LIST && echo task ${DRY:+--dry} --silent -t $F "$@"
-					! $LIST && exec task ${DRY:+--dry} --silent -t $F "$@" && return
-				fi
-			done
-			$DEBUG echo "task name $NAME not found in $TUSKFILES"
-		done
-		! $LIST && echo "task file not found as any of task-$NAME.yml <TUSKDIR>/Taskfile.yml"
-		echo "in TUSKDIRS=$TUSKDIRS"
-	)
+	MATCHED=$(findtoolverb false false tusk $NAME "$TOOLFILE_DEFAULT" "$TOOLFILE_PATTERN")
+	if [ $? == 0 ]; then
+		( exec $TOOL $TOOL_OPTS $MATCHED "$@" )
+		return
+	fi
+	echo "findtool nothing found: $MATCHED"
 }

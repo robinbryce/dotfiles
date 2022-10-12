@@ -1,3 +1,11 @@
+-- wart list:
+-- 'gd' just highlights for go and svelte files
+-- auto insert/completion for things like html tags not working in svelte files
+-- go lang ingeneral not fully configured
+-- . gofmt on save not setup
+-- . goimports not setup
+
+
 -- made using: https://vonheikemen.github.io/devlog/tools/configuring-neovim-using-lua/
 -- see also: https://github.com/nanotee/nvim-lua-guide
 -- OLD
@@ -108,16 +116,6 @@ vim.keymap.set('n', '<leader>nn', ':set nonumber!<CR>:set foldcolumn=0<CR>')
 -- Source navigation & formatting
 -- . lua/user/lsp.lua (language server protocl)
 -- . lua/user.lspsaga.lua (language server protocl)
-
--- LANGUAGE SERVER PROTOCOL Keybindings
--- (see further down for the connection between LSP attach and this autocmd)
-vim.api.nvim_create_autocmd('User', {
-  pattern = 'LspAttached',
-  desc = 'LSP actions',
-  callback = function()
-
-  end
-})
 
 -- ---------------------------------------------------------------------------
 -- snips bindings

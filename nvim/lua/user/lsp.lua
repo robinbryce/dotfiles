@@ -1,18 +1,5 @@
 -- language server protocol
 -- based on: https://vonheikemen.github.io/devlog/tools/setup-nvim-lspconfig-plus-nvim-cmp/
-local lsp_defaults = {
-  -- milis to wait for next document update notification
-  flags = {
-    debounce_text_changes = 150,
-  },
-  -- announce to the servier what the editor caps are
-  capabilities = require('cmp_nvim_lsp').update_capabilities(
-    vim.lsp.protocol.make_client_capabilities()
-  ),
-  --callback triggered when any LSP attaches to a buffer. configured to trigger
-  --an autocmd so we can manage the on_attach actions else where
-  on_attach = on_attach
-}
 
 function on_attach(client, bufnr)
   local bufmap = function(mode, lhs, rhs, opts)
@@ -22,6 +9,7 @@ function on_attach(client, bufnr)
     end
     vim.keymap.set(mode, lhs, rhs, merged_opts)
   end
+  print("on_attach CALLED")
 
   -- from https://medium.com/swlh/neovim-lsp-dap-and-fuzzy-finder-60337ef08060
   -- Mappings
@@ -39,14 +27,14 @@ function on_attach(client, bufnr)
   -- nil ref err
 
   -- -- Set some keybinds conditional on server capabilities
-  if client.resolved_capabilities.document_formatting then
+  if client.server_capabilities.document_formatting then
       bufmap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-  elseif client.resolved_capabilities.document_range_formatting then
+  elseif client.server_capabilities.document_range_formatting then
       bufmap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
   end
 
   -- Set autocommands conditional on server_capabilities
-  if client.resolved_capabilities.document_highlight then
+  if client.server_capabilities.document_highlight then
       require('lspconfig').util.nvim_multiline_command [[
       :hi LspReferenceRead cterm=bold ctermbg=red guibg=LightYellow
       :hi LspReferenceText cterm=bold ctermbg=red guibg=LightYellow
@@ -97,6 +85,20 @@ function on_attach(client, bufnr)
   -- Move to the next diagnostic
   bufmap('n', ']e', '<cmd>lua vim.diagnostic.goto_next()<cr>')
 end
+
+local lsp_defaults = {
+  -- milis to wait for next document update notification
+  flags = {
+    debounce_text_changes = 150,
+  },
+  -- announce to the servier what the editor caps are
+  capabilities = require('cmp_nvim_lsp').update_capabilities(
+    vim.lsp.protocol.make_client_capabilities()
+  ),
+  --callback triggered when any LSP attaches to a buffer. configured to trigger
+  --an autocmd so we can manage the on_attach actions else where
+  on_attach = on_attach
+}
 
 local lspconfig = require('lspconfig')
 
