@@ -1,0 +1,56 @@
+interpreter: bash -c
+name: hoy
+usage: polysensus hoy ops
+options:
+
+  launchdir:
+    usage: >
+      Don't set this option. Its a work around for a go-tusk peculiarity
+    environment: PWD
+
+tasks:
+  sealcert:
+    usage: "gets the cluster secret seal public cert for hoy.polysensus.com (using explicit IP address)"
+    run:
+      - command:
+          exec: |
+            set -e
+            curl -ks --header 'Host: hoy.polysensus.com' https://34.142.43.54/_/sealed-secrets/v1/cert.pem
+
+  auth:
+    usage: "athenticates kubectl & k9s context for polysensus hoy and sets the default project"
+    options:
+      nointeract:
+        usage: "skip the interactive browser step (assume it is complete already)"
+        short: I
+        type: bool
+    run:
+      - command:
+          exec: |
+            set -e
+            cd ${launchdir}
+            # This is interactive
+            ! ${nointeract} && gcloud auth login
+            gcloud config set project hoy-dev-1
+            gcloud container clusters get-credentials hoy-1 --zone europe-west2-a
+            kubectl config rename-context gke_hoy-dev-1_europe-west2-a_hoy-1 hoy-1 &> /dev/null || true
+            kubectl config use-context hoy-1
+            kubectl config current-context
+  set:
+    run:
+      - command:
+          exec: |
+            set -e
+            kubectl config rename-context gke_hoy-dev-1_europe-west2_hoy-1 hoy-1 &> /dev/null || true
+            kubectl config use-context hoy-1
+
+  delete-failed:
+    run:
+      - command:
+          exec: |
+            for ns in $(kubectl get namespace -o custom-columns=":metadata.name"); do
+              [ -z "$ns" ] && continue
+              for name in $(kubectl -n ${ns} get pod --field-selector status.phase=Failed -o name); do
+                kubectl -n ${ns} delete $name
+              done
+            done
