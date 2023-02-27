@@ -1,0 +1,63 @@
+interpreter: bash -c
+name: gcp
+usage: gcp project ops
+options:
+
+  launchdir:
+    usage: >
+      Don't set this option. Its a work around for a go-tusk peculiarity
+    environment: PWD
+
+  verbose:
+    type: bool
+    default: false
+    short: "v"
+
+tasks:
+  auth-hoy:
+    usage: "athenticates kubectl & k9s context for polysensus hoy and sets the default project"
+    options:
+      nointeract:
+        usage: "skip the interactive browser step (assume it is complete already)"
+        short: I
+        type: bool
+    run:
+      - command:
+          exec: |
+            set -e
+            cd ${launchdir}
+            # This is interactive
+            ! ${nointeract} && gcloud auth login
+            gcloud config set project hoy-dev-1
+            gcloud container clusters get-credentials hoy-1 --zone europe-west2-a
+            kubectl config rename-context gke_hoy-dev-1_europe-west2-a_hoy-1 hoy-1 &> /dev/null || true
+            kubectl config use-context hoy-1
+            kubectl config current-context
+
+  auth-iona:
+    usage: "athenticates kubectl & k9s context for iona and sets the default project"
+    options:
+      nointeract:
+        usage: "skip the interactive browser step (assume it is complete already)"
+        short: I
+        type: bool
+    run:
+      - command:
+          exec: |
+            set -e
+            cd ${launchdir}
+            # This is interactive
+            ! ${nointeract} && gcloud auth login
+            gcloud config set project iona-1
+            gcloud container clusters get-credentials kluster --zone europe-west2-a
+            kubectl config rename-context gke_iona-1_europe-west2-a_kluster iona-1 &> /dev/null || true
+            kubectl config use-context iona-1
+            kubectl config current-context
+
+  set-hoy:
+    run:
+      - command:
+          exec: |
+            set -e
+            kubectl config rename-context gke_hoy-dev-1_europe-west2_hoy-1 hoy-1 &> /dev/null || true
+            kubectl config use-context hoy-1

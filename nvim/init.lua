@@ -25,6 +25,12 @@ function dirname(path)
   return path:match("(.*"..sep..")")
 end
 
+local uv = vim.loop
+local function file_exists(path)
+    local stat = uv.fs_stat(path)
+    return stat and stat.type == 'file'
+end
+
 -- runtimepath (and consequently lua require path)
 -- https://neovim.io/doc/user/lua.html#lua-require
 
@@ -217,7 +223,9 @@ luasnip = require('luasnip')
 luasnip.filetype_extend("all", {"_"})
 
 -- require("luasnip.loaders.from_vscode").lazy_load(luasnip_opts)
-require("luasnip.loaders.from_vscode").load(luasnip_opts)
+if file_exists(vim.fn.getcwd() .. '/.vscode/package.json') then
+  require("luasnip.loaders.from_vscode").load(luasnip_opts)
+end
 -- require("luasnip.loaders.from_vscode").load({paths = '~/.config/nvim/snippets-vscode'})
 
 -- supports vscode format but we need to configure it to look in the

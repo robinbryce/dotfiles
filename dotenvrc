@@ -1,9 +1,12 @@
 export TUSKDIRS=~/.tuskfiles
+export CONFIGURE_OPTS="-with-openssl=/home/linuxbrew/.linuxbrew/opt/openssl@3 --with-openssl-rpath=auto"
+#export LDFLAGS="-Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/openssl@3/lib $LDFLAGS"
 export LDFLAGS="-L/home/linuxbrew/.linuxbrew/opt/xz/lib $LDFLAGS"
 export LDFLAGS="-L/home/linuxbrew/.linuxbrew/opt/zlib/lib $LDFLAGS"
 export LDFLAGS="-L/home/linuxbrew/.linuxbrew/opt/bzip2/lib $LDFLAGS"
 export LDFLAGS="-L/home/linuxbrew/.linuxbrew/opt/sqlite3/lib $LDFLAGS"
 
+# export CPPFLAGS="-I/home/linuxbrew/.linuxbrew/opt/openssl@3/include $CPPFLAGS"
 export CPPFLAGS="-I/home/linuxbrew/.linuxbrew/opt/xz/include $CPPFLAGS"
 export CPPFLAGS="-I/home/linuxbrew/.linuxbrew/opt/zlib/include $CPPFLAGS"
 export CPPFLAGS="-I/home/linuxbrew/.linuxbrew/opt/bzip2/include $CPPFLAGS"

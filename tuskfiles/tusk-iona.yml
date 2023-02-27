@@ -1,0 +1,50 @@
+interpreter: bash -c
+name: iona
+usage: polysensus iona ops
+options:
+
+  launchdir:
+    usage: >
+      Don't set this option. Its a work around for a go-tusk peculiarity
+    environment: PWD
+
+tasks:
+
+  auth:
+    usage: "athenticates kubectl & k9s context for polysensus hoy and sets the default project"
+    options:
+      nointeract:
+        usage: "skip the interactive browser step (assume it is complete already)"
+        short: I
+        type: bool
+    run:
+      - command:
+          exec: |
+            set -e
+            cd ${launchdir}
+            # This is interactive
+            echo "Login as robinbryce@gmail.com"
+            ! ${nointeract} && gcloud auth login
+            gcloud config set project iona-1
+            gcloud container clusters get-credentials kluster --zone europe-west2-a
+            kubectl config rename-context gke_iona-1_europe-west2-a_kluster iona-1 &> /dev/null || true
+            kubectl config use-context iona-1
+            kubectl config current-context
+  set:
+    run:
+      - command:
+          exec: |
+            set -e
+            kubectl config rename-context gke_iona-1_europe-west2_kluster iona-1 &> /dev/null || true
+            kubectl config use-context iona-1
+
+  delete-failed:
+    run:
+      - command:
+          exec: |
+            for ns in $(kubectl get namespace -o custom-columns=":metadata.name"); do
+              [ -z "$ns" ] && continue
+              for name in $(kubectl -n ${ns} get pod --field-selector status.phase=Failed -o name); do
+                kubectl -n ${ns} delete $name
+              done
+            done
