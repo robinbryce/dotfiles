@@ -62,8 +62,8 @@ vim.cmd('source ' .. configdir .. '/vim/bufreload.vim')
 
 -- EDIT
 vim.opt.tabstop = 2
-vim.opt.shiftwidth = 3
-vim.opt.expandtab = false
+vim.opt.shiftwidth = 2
+vim.opt.expandtab = true
 vim.opt.textwidth = 79
 vim.cmd('set clipboard+=unnamedplus')
 -- https://community.chocolatey.org/packages/win32yank
