@@ -4,7 +4,10 @@ alias k='kubectl'
 alias tu='tusk -q'
 alias ta='task -s'
 
+# helm & k8s
+
 # avid/quorum
+alias buildertask='docker exec -t task-build-container task'
 alias q0exec='kubectl -n dev-robin-quorum-node-0 -c avid-quorum exec avid-quorum-quorum-0 -- geth attach /var/lib/quorum/node/geth.ipc --exec'
 alias q0esh='kubectl -it -n dev-robin-quorum-node-0 -c avid-quorum exec avid-quorum-quorum-0 -- geth attach /var/lib/quorum/node/geth.ipc'
 alias q1exec='kubectl -n dev-robin-quorum-node-1 -c avid-quorum exec avid-quorum-quorum-0 -- geth attach /var/lib/quorum/node/geth.ipc --exec'
@@ -29,7 +32,7 @@ alias k9stage='k9s --context stage-3'
 alias azsetsub='az account set --subscription 8a128464-7dd4-4077-8eab-da16cbf1dacf'
 # current scratch credentials get
 alias azcreds='az aks get-credentials -n scratch-8 -g scratch-8'
-alias azlogin='az acr login -n jitsuininc'
+alias azlogin='$(cd ~/jitsuin/avid && task utils:acr-login)'
 
 
 

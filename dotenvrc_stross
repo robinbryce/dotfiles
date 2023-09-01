@@ -1,0 +1,2 @@
+export TUSKDIRS=~/.tuskfiles
+export CLOUDSDK_PYTHON=~/jitsuin/.direnv/python-3.8.13/bin/python
