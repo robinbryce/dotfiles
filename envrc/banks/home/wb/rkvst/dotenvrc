@@ -1,9 +1,0 @@
-source_up_if_exists
-export RELEASE=dev-$USER-0
-export VALUE_CHAIN=value-chain-dev-$USER
-
-export RKVST_AVIDCOMMON_TOKEN=github_pat_11AA6TXSI0WZXezkfYBG21_ISpD4dgLtX8hkEt2r663wMg1gxRr3MiK99YGhITjClf2BI
-export SENDGRID_API_KEY=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
-export APP_INSIGHTS_INSTRUMENTATION_KEY="f3389bf9-40b6-42a5-95e9-4d4afc94b513"
-export GOOGLE_CLIENT_ID=997401282307-pjn5jq0h5gihprfa0htuj4spdgil679j.apps.googleusercontent.com
-export GOOGLE_CLIENT_SECRET=BG-7LrHwK_odR8VEwvOemLJA
