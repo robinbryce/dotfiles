@@ -14,9 +14,6 @@ alias q1exec='kubectl -n dev-robin-quorum-node-1 -c avid-quorum exec avid-quorum
 alias q0eth='kubectl -n dev-robin-quorum-node-0 -c avid-quorum exec avid-quorum-quorum-0 -- geth'
 
 # Tusks
-alias bbake='tusk -qf ~/polysensus/ops/benchblock/tusk.yml'
-alias rbjit='tusk -q -f ~/jitsuin/robinbryce/tusk.yml'
-alias rbtha='tusk -q -f ~/thaumagen/robinbryce/tusk.yml'
 alias rengopls='for pid in $(pgrep gopls); do renice -n 10 -p $pid; done'
 alias gap='tuf git gap'
 alias gac='tuf git gap -P'

@@ -1,0 +1,33 @@
+# alias jitmux='tmux new-session -t jitsuin -s jitsuin -c ~/jitsuin\; split-window -h \; split-window -v \; split-window -h \;'
+alias e='nvim'
+alias k='kubectl'
+alias tu='tusk -q'
+alias ta='task -s'
+
+# helm & k8s
+
+# avid/quorum
+alias buildertask='docker exec -t task-build-container task'
+
+# Tusks
+alias rengopls='for pid in $(pgrep gopls); do renice -n 10 -p $pid; done'
+alias gap='tuf git gap'
+alias gac='tuf git gap -P'
+
+# tmux
+alias jitmux='tmux new-session -s rkvst -c ~/wb/rkvst\; split-window -h \; split-window -v \; split-window -h \;'
+alias thamux='tmux new-session -s thaumagen -c ~/wb/thaumagen\; split-window -h \; split-window -v \; split-window -h \;'
+alias polmux='tmux new-session -s polysensus -c ~/wb/polysensus\; split-window -h \; split-window -v \; split-window -h \;'
+
+# k8s
+alias k9stage='k9s --context stage-3'
+# current main jitsuin (paid) subscription
+# rkvst azure specific
+alias azcreds='az aks get-credentials -n scratch-9 -g scratch-9'
+alias azlogin='$(cd ~/wb/rkvst/avid && task utils:acr-login)'
+
+
+# Historic, for reference only
+# alias q0exec='kubectl -n dev-robin-quorum-node-0 -c avid-quorum exec avid-quorum-quorum-0 -- geth attach /var/lib/quorum/node/geth.ipc --exec'
+# alias q0esh='kubectl -it -n dev-robin-quorum-node-0 -c avid-quorum exec avid-quorum-quorum-0 -- geth attach /var/lib/quorum/node/geth.ipc'
+

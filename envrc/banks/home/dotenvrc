@@ -1,0 +1,9 @@
+export WB_ROOT=$HOME/wb
+export EDITOR=nvim
+
+# Rust toolchain
+export RUSTUP_HOME=$HOME/wb/.rustup
+export CARGO_HOME=$HOME/wb/.cargo
+
+# Foundry RS (smart contract dev)
+export FOUNDRY_DIR=$WB_ROOT/.foundry

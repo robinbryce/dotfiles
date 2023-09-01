@@ -1,0 +1,3 @@
+source_up_if_exists
+export RKVST_ROOT=$(pwd)/rkvst
+export POLYSENSUS_ROOT=$(pwd)/polysensus
