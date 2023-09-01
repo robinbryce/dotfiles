@@ -51,6 +51,12 @@ export NVM_DIR="$HOME/wb/nvm"
 # 2023/09 foundryup
 export PATH="$PATH:/Users/robin/wb/.foundry/bin"
 
+# 2023/09 pyenv https://github.com/pyenv/pyenv#homebrew-in-macos
+export PYENV_ROOT=$HOME/wb/.pyenv
+# stops source builds accidentally linking against pyenv provided pythons
+alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew'
+eval "$(pyenv init -)"
+
 # 2023/09 must be last, especially after anything that manipulates the prompt
 #  https://direnv.net/docs/hook.html
 eval "$(direnv hook bash)"

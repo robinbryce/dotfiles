@@ -1,3 +1,14 @@
 source_up_if_exists
 export RKVST_ROOT=$(pwd)/rkvst
+
+# other env's
+# - always load .secret first
+dotenv_if_exists .env.secret
+# - load .local after .secret so it can use the secrets
+dotenv_if_exists .env.local
+
 export POLYSENSUS_ROOT=$(pwd)/polysensus
+
+# other env's
+# - load .last after everything
+dotenv_if_exists .env.last

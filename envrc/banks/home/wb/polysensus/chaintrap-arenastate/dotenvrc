@@ -1,0 +1,28 @@
+source_up_if_exists
+
+# other env's
+# - always load .secret first
+dotenv_if_exists .env.secret
+# - load .local after .secret so it can use the secrets
+dotenv_if_exists .env.local
+
+export ARENASTATE_HARDHAT_DEPLOY_KEY=hardhat:0
+export ARENASTATE_HARDHAT_OWNER_KEY=hardhat:1
+export ARENASTATE_HARDHAT_GUARDIAN_KEY=hardhat:10
+export ARENASTATE_HARDHAT_USER1_KEY=hardhat:11
+export ARENASTATE_HARDHAT_USER2_KEY=hardhat:12
+export ARENASTATE_HARDHAT_USER3_KEY=hardhat:13
+export ARENASTATE_HARDHAT_USER4_KEY=hardhat:14
+
+export ARENASTATE_OP_GOERLI_ARENA=0x0c075885e9EBB701997bA3e1B8D291688Dc0bCEE
+export ARENASTATE_OP_GOERLI_ETHERSCAN_URL=https://api-goerli-optimistic.etherscan.io/api
+
+export ARENASTATE_OP_GOERLI_PROVIDER_API_URL=https://opt-goerli.g.alchemy.com/v2/
+export ARENASTATE_OP_L1_GOERLI_PROVIDER_API_URL=https://eth-goerli.g.alchemy.com/v2/
+
+export ARENASTATE_POLYGON_MUMBAI_ARENA=0xb9fDEB9C92870861ba616114B9651ac3Ad11fD68
+export ARENASTATE_POLYGON_MUMBAI_PROVIDER_API_URL=https://polygon-mumbai.g.alchemy.com/v2/
+
+# other env's
+# - load .last after everything
+dotenv_if_exists .env.last

@@ -1,18 +1,15 @@
-export WB_ROOT=$HOME/wb
+source_up_if_exists
+
 # other env's
 # - always load .secret first
 dotenv_if_exists .env.secret
 # - load .local after .secret so it can use the secrets
 dotenv_if_exists .env.local
 
-export EDITOR=nvim
+export PYENV_VERSION=3.11.5
 
-# Rust toolchain
-export RUSTUP_HOME=$HOME/wb/.rustup
-export CARGO_HOME=$HOME/wb/.cargo
-
-# Foundry RS (smart contract dev)
-export FOUNDRY_DIR=$WB_ROOT/.foundry
+export RELEASE=dev-$USER-0
+export VALUE_CHAIN=value-chain-dev-$USER
 
 # other env's
 # - load .last after everything
