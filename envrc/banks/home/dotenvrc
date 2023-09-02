@@ -5,7 +5,17 @@ dotenv_if_exists .env.secret
 # - load .local after .secret so it can use the secrets
 dotenv_if_exists .env.local
 
+# This is the default, all compliant software uses $HOME/.config if this var is
+# not set.
+export XDG_CONFIG_HOME=$HOME/.config
+
+# The default config for nvim will always be simple and minimalistic
 export EDITOR=nvim
+
+export MNV_APP_NAME=modern-neovim
+export MNV_APP_CONFIG=~/.config/$MNV_APP_NAME
+# Modern NeoVim build - see https://alpha2phi.medium.com/modern-neovim-init-lua-ab1220e3ecc1 (forked)
+alias mnv="NVIM_APPNAME=$MNV_APP_NAME nvim"
 
 # Rust toolchain
 export RUSTUP_HOME=$HOME/wb/.rustup

@@ -1,5 +1,9 @@
 # alias jitmux='tmux new-session -t jitsuin -s jitsuin -c ~/jitsuin\; split-window -h \; split-window -v \; split-window -h \;'
 alias e='nvim'
+
+alias emin='NVIM_APPDIR=$HOME/.config/nvim-minimalist XDG_DATA_HOME=$NVIM_APPDIR/share XDG_CACHE_HOME=$NVIM_APPDIR XDG_CONFIG_HOME=$NVIM_APPDIR nvim'
+alias edev='NVIM_APPNAME=modern-neovim nvim'
+
 alias k='kubectl'
 alias tu='tusk -q'
 alias ta='task -s'
