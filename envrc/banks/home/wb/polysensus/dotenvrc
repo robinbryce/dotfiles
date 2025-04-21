@@ -1,3 +1,4 @@
+source_up_if_exists
 # other env's
 # - always load .secret first
 dotenv_if_exists .env.secret

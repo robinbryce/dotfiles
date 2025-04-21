@@ -1,3 +1,5 @@
+source ~/.config/direnv/lib/use_nvm.sh
+
 export WB_ROOT=$HOME/wb
 # other env's
 # - always load .secret first
@@ -12,17 +14,15 @@ export XDG_CONFIG_HOME=$HOME/.config
 # The default config for nvim will always be simple and minimalistic
 export EDITOR=nvim
 
-export MNV_APP_NAME=modern-neovim
-export MNV_APP_CONFIG=~/.config/$MNV_APP_NAME
-# Modern NeoVim build - see https://alpha2phi.medium.com/modern-neovim-init-lua-ab1220e3ecc1 (forked)
-alias mnv="NVIM_APPNAME=$MNV_APP_NAME nvim"
-
 # Rust toolchain
 export RUSTUP_HOME=$HOME/wb/.rustup
 export CARGO_HOME=$HOME/wb/.cargo
 
+#PATH_add $HOME/go/bin
+PATH_add $HOME/sdk/go1.24.1/bin
+
 # Foundry RS (smart contract dev)
-export FOUNDRY_DIR=$WB_ROOT/.foundry
+#export FOUNDRY_DIR=$WB_ROOT/.foundry
 
 # other env's
 # - load .last after everything
